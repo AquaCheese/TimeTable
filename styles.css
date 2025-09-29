@@ -525,6 +525,25 @@ header p {
     }
 }
 
+@media (max-width: 768px) {
+    .customization-content {
+        padding: 15px;
+    }
+    
+    .dimension-controls,
+    .appearance-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .customization-actions {
+        justify-content: center;
+    }
+    
+    .time-management {
+        justify-content: center;
+    }
+}
+
 @media (max-width: 480px) {
     .section {
         padding: 15px;
@@ -544,12 +563,288 @@ header p {
     .time-slot {
         min-height: 40px;
     }
+    
+    .customization-panel {
+        margin: 10px -10px;
+        border-radius: 0;
+    }
+    
+    .time-slot-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .drag-handle {
+        text-align: center;
+    }
+}
+
+/* Customization Panel Styles */
+.customization-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 2px solid #e2e8f0;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+.customization-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.customization-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.customization-content {
+    padding: 20px;
+}
+
+.customization-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.customization-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.customization-section h4 {
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dimension-controls,
+.appearance-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.dimension-controls .form-group,
+.appearance-controls .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dimension-controls input[type="range"],
+.appearance-controls input[type="range"] {
+    width: 100%;
+    margin: 5px 0;
+}
+
+.dimension-controls span,
+.appearance-controls span {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.time-management {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.customization-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+}
+
+/* Excel-like table features */
+.timetable-resizable {
+    position: relative;
+}
+
+.timetable th,
+.timetable td {
+    position: relative;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.timetable th:hover,
+.timetable td:hover {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.resize-handle {
+    position: absolute;
+    background: #667eea;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: col-resize;
+    z-index: 100;
+}
+
+.resize-handle-vertical {
+    right: -2px;
+    top: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.resize-handle-horizontal {
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    cursor: row-resize;
+}
+
+.timetable th:hover .resize-handle,
+.timetable td:hover .resize-handle {
+    opacity: 0.7;
+}
+
+.resize-handle:hover {
+    opacity: 1 !important;
+}
+
+/* Time slot editor styles */
+.time-slots-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.time-slot-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #f1f1f1;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.time-slot-item:hover {
+    background: #e2e8f0;
+    transform: translateX(2px);
+}
+
+.time-slot-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.time-slot-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.time-slot-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.drag-handle {
+    cursor: move;
+    color: #9ca3af;
+    font-size: 1.2rem;
+    padding: 5px;
+}
+
+.drag-handle:hover {
+    color: #667eea;
+}
+
+.remove-time-slot {
+    background: #f56565;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.remove-time-slot:hover {
+    background: #e53e3e;
+}
+
+/* Dragging styles */
+.time-slot-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.time-slot-item.drag-over {
+    border-top: 3px solid #667eea;
 }
 
 /* Print Styles */
 @media print {
     body {
         background: white;
+    }
+    
+    .customization-panel {
+        display: none !important;
     }
     
     .section {

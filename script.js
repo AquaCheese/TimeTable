@@ -10,6 +10,13 @@ class TimeTableApp {
             endTime: '17:00',
             slotDuration: 60
         };
+        this.customization = {
+            cellWidth: 120,
+            cellHeight: 60,
+            borderStyle: 'solid',
+            gridOpacity: 1,
+            customTimeSlots: [] // For manually edited time slots
+        };
         this.notificationSettings = {
             enabled: false,
             before5: true,
@@ -63,6 +70,23 @@ class TimeTableApp {
                 this.updateCustomTimes();
             }
         });
+        
+        // Customization panel events
+        document.getElementById('customize-table').addEventListener('click', () => this.toggleCustomizationPanel());
+        document.getElementById('close-customization').addEventListener('click', () => this.hideCustomizationPanel());
+        document.getElementById('edit-time-slots').addEventListener('click', () => this.openTimeSlotEditor());
+        document.getElementById('add-time-slot').addEventListener('click', () => this.addTimeSlot());
+        document.getElementById('remove-time-slot').addEventListener('click', () => this.removeTimeSlot());
+        document.getElementById('reset-customization').addEventListener('click', () => this.resetCustomization());
+        document.getElementById('apply-customization').addEventListener('click', () => this.applyCustomization());
+        
+        // Dimension control events
+        document.getElementById('cell-width').addEventListener('input', (e) => this.updateDimensionPreview('width', e.target.value));
+        document.getElementById('cell-height').addEventListener('input', (e) => this.updateDimensionPreview('height', e.target.value));
+        document.getElementById('grid-opacity').addEventListener('input', (e) => this.updateOpacityPreview(e.target.value));
+        
+        // Time slot editor events
+        document.getElementById('add-new-time-slot').addEventListener('click', () => this.addNewTimeSlotInEditor());
         
         // Modal events
         document.getElementById('slot-form').addEventListener('submit', (e) => this.saveSlot(e));
@@ -175,16 +199,10 @@ class TimeTableApp {
         html += '</tbody></table>';
         container.innerHTML = html;
         
-        // Add click events to time slots
-        document.querySelectorAll('.time-slot').forEach(slot => {
-            slot.addEventListener('click', (e) => this.openSlotModal(e.target));
-            slot.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    this.openSlotModal(e.target);
-                }
-            });
-        });
+        // Apply customization styles
+        this.applyCustomizationStyles();
+        
+        // Add click events to time slotsts to time slots\n        document.querySelectorAll('.time-slot').forEach(slot => {\n            slot.addEventListener('click', (e) => this.openSlotModal(e.target));\n            slot.addEventListener('keydown', (e) => {\n                if (e.key === 'Enter' || e.key === ' ') {\n                    e.preventDefault();\n                    this.openSlotModal(e.target);\n                }\n            });\n        });
     }
 
     generateTimeSlots() {
@@ -292,7 +310,8 @@ class TimeTableApp {
             config: this.config,
             timetableData: this.timetableData,
             notificationSettings: this.notificationSettings,
-            currentWeek: this.currentWeek
+            currentWeek: this.currentWeek,
+            customization: this.customization
         };
         
         localStorage.setItem('studentTimetable', JSON.stringify(data));
@@ -313,6 +332,7 @@ class TimeTableApp {
             this.timetableData = data.timetableData;
             this.notificationSettings = data.notificationSettings || this.notificationSettings;
             this.currentWeek = data.currentWeek || 0;
+            this.customization = data.customization || this.customization;
             
             // Update form fields
             document.getElementById('weeks').value = this.config.weeks;
@@ -338,7 +358,9 @@ class TimeTableApp {
             try {
                 const data = JSON.parse(saved);
                 this.notificationSettings = data.notificationSettings || this.notificationSettings;
+                this.customization = data.customization || this.customization;
                 this.updateNotificationUI();
+                this.applyCustomizationStyles();
             } catch (e) {
                 console.error('Error loading from storage:', e);
             }
@@ -591,6 +613,331 @@ class TimeTableApp {
         }
     }
 
+    // Table customization methods
+    toggleCustomizationPanel() {
+        const panel = document.getElementById('customization-panel');
+        if (panel.style.display === 'none' || !panel.style.display) {
+            this.showCustomizationPanel();
+        } else {
+            this.hideCustomizationPanel();
+        }
+    }
+
+    showCustomizationPanel() {
+        const panel = document.getElementById('customization-panel');
+        panel.style.display = 'block';
+        this.updateCustomizationUI();
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    hideCustomizationPanel() {
+        document.getElementById('customization-panel').style.display = 'none';
+    }
+
+    updateCustomizationUI() {
+        document.getElementById('cell-width').value = this.customization.cellWidth;
+        document.getElementById('cell-height').value = this.customization.cellHeight;
+        document.getElementById('border-style').value = this.customization.borderStyle;
+        document.getElementById('grid-opacity').value = this.customization.gridOpacity;
+        
+        document.getElementById('cell-width-value').textContent = `${this.customization.cellWidth}px`;
+        document.getElementById('cell-height-value').textContent = `${this.customization.cellHeight}px`;
+        document.getElementById('grid-opacity-value').textContent = `${Math.round(this.customization.gridOpacity * 100)}%`;
+    }
+
+    updateDimensionPreview(type, value) {
+        if (type === 'width') {
+            this.customization.cellWidth = parseInt(value);
+            document.getElementById('cell-width-value').textContent = `${value}px`;
+        } else if (type === 'height') {
+            this.customization.cellHeight = parseInt(value);
+            document.getElementById('cell-height-value').textContent = `${value}px`;
+        }
+        this.applyCustomizationStyles();
+    }
+
+    updateOpacityPreview(value) {
+        this.customization.gridOpacity = parseFloat(value);
+        document.getElementById('grid-opacity-value').textContent = `${Math.round(value * 100)}%`;
+        this.applyCustomizationStyles();
+    }
+
+    applyCustomization() {
+        this.customization.borderStyle = document.getElementById('border-style').value;
+        this.applyCustomizationStyles();
+        this.saveTimetable();
+        this.showSuccessMessage('Table customization applied!');
+    }
+
+    applyCustomizationStyles() {
+        const style = document.getElementById('dynamic-table-styles') || document.createElement('style');
+        style.id = 'dynamic-table-styles';
+        
+        style.textContent = `
+            .timetable th:not(:first-child),
+            .timetable td:not(:first-child) {
+                width: ${this.customization.cellWidth}px;
+                min-width: ${this.customization.cellWidth}px;
+                max-width: ${this.customization.cellWidth}px;
+            }
+            .time-slot {
+                height: ${this.customization.cellHeight}px;
+                min-height: ${this.customization.cellHeight}px;
+            }
+            .timetable th,
+            .timetable td {
+                border-style: ${this.customization.borderStyle};
+                opacity: ${this.customization.gridOpacity};
+            }
+            .timetable th:first-child,
+            .timetable td:first-child {
+                opacity: 1;
+            }
+        `;
+        
+        if (!document.getElementById('dynamic-table-styles')) {
+            document.head.appendChild(style);
+        }
+    }
+
+    resetCustomization() {
+        if (confirm('Reset all customization to default values?')) {
+            this.customization = {
+                cellWidth: 120,
+                cellHeight: 60,
+                borderStyle: 'solid',
+                gridOpacity: 1,
+                customTimeSlots: []
+            };
+            this.updateCustomizationUI();
+            this.applyCustomizationStyles();
+            this.showSuccessMessage('Customization reset to defaults!');
+        }
+    }
+
+    // Time slot management methods
+    openTimeSlotEditor() {
+        const modal = document.getElementById('time-slot-editor-modal');
+        modal.style.display = 'block';
+        this.populateTimeSlotEditor();
+    }
+
+    populateTimeSlotEditor() {
+        const container = document.getElementById('time-slots-list');
+        const timeSlots = this.generateTimeSlots();
+        
+        container.innerHTML = '';
+        timeSlots.forEach((timeSlot, index) => {
+            const [startTime, endTime] = timeSlot.split(' - ');
+            const item = document.createElement('div');
+            item.className = 'time-slot-item';
+            item.dataset.index = index;
+            item.draggable = true;
+            
+            item.innerHTML = `
+                <span class="drag-handle">⋮⋮</span>
+                <input type="time" class="time-slot-input" data-type="start" value="${startTime}">
+                <span>-</span>
+                <input type="time" class="time-slot-input" data-type="end" value="${endTime}">
+                <button type="button" class="remove-time-slot" onclick="app.removeTimeSlotItem(${index})">×</button>
+            `;
+            
+            // Add drag and drop events
+            item.addEventListener('dragstart', this.handleDragStart.bind(this));
+            item.addEventListener('dragover', this.handleDragOver.bind(this));
+            item.addEventListener('drop', this.handleDrop.bind(this));
+            item.addEventListener('dragend', this.handleDragEnd.bind(this));
+            
+            container.appendChild(item);
+        });
+    }
+
+    addNewTimeSlotInEditor() {
+        const container = document.getElementById('time-slots-list');
+        const lastItem = container.lastElementChild;
+        let newStartTime = '17:00';
+        let newEndTime = '18:00';
+        
+        if (lastItem) {
+            const lastEndInput = lastItem.querySelector('[data-type="end"]');
+            newStartTime = lastEndInput.value;
+            const [hours, minutes] = newStartTime.split(':').map(Number);
+            const newEndMinutes = (hours * 60 + minutes + this.config.slotDuration) % (24 * 60);
+            const newHours = Math.floor(newEndMinutes / 60);
+            const newMins = newEndMinutes % 60;
+            newEndTime = `${newHours.toString().padStart(2, '0')}:${newMins.toString().padStart(2, '0')}`;
+        }
+        
+        const index = container.children.length;
+        const item = document.createElement('div');
+        item.className = 'time-slot-item';
+        item.dataset.index = index;
+        item.draggable = true;
+        
+        item.innerHTML = `
+            <span class="drag-handle">⋮⋮</span>
+            <input type="time" class="time-slot-input" data-type="start" value="${newStartTime}">
+            <span>-</span>
+            <input type="time" class="time-slot-input" data-type="end" value="${newEndTime}">
+            <button type="button" class="remove-time-slot" onclick="app.removeTimeSlotItem(${index})">×</button>
+        `;
+        
+        // Add drag and drop events
+        item.addEventListener('dragstart', this.handleDragStart.bind(this));
+        item.addEventListener('dragover', this.handleDragOver.bind(this));
+        item.addEventListener('drop', this.handleDrop.bind(this));
+        item.addEventListener('dragend', this.handleDragEnd.bind(this));
+        
+        container.appendChild(item);
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    removeTimeSlotItem(index) {
+        const container = document.getElementById('time-slots-list');
+        const item = container.querySelector(`[data-index="${index}"]`);
+        if (item && container.children.length > 1) {
+            item.style.animation = 'slideOutUp 0.3s ease-in forwards';
+            setTimeout(() => {
+                item.remove();
+                this.reindexTimeSlots();
+            }, 300);
+        } else if (container.children.length === 1) {
+            this.showErrorMessage('Cannot remove the last time slot!');
+        }
+    }
+
+    reindexTimeSlots() {
+        const container = document.getElementById('time-slots-list');
+        Array.from(container.children).forEach((item, index) => {
+            item.dataset.index = index;
+            const removeBtn = item.querySelector('.remove-time-slot');
+            removeBtn.setAttribute('onclick', `app.removeTimeSlotItem(${index})`);
+        });
+    }
+
+    addTimeSlot() {
+        if (document.getElementById('time-slot-editor-modal').style.display === 'block') {
+            this.addNewTimeSlotInEditor();
+        } else {
+            this.openTimeSlotEditor();
+            setTimeout(() => this.addNewTimeSlotInEditor(), 100);
+        }
+    }
+
+    removeTimeSlot() {
+        if (document.getElementById('time-slot-editor-modal').style.display === 'block') {
+            const container = document.getElementById('time-slots-list');
+            const lastIndex = container.children.length - 1;
+            if (lastIndex >= 0) {
+                this.removeTimeSlotItem(lastIndex);
+            }
+        } else {
+            this.openTimeSlotEditor();
+        }
+    }
+
+    // Drag and drop functionality for time slots
+    handleDragStart(e) {
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.outerHTML);
+        e.dataTransfer.setData('text/plain', e.target.dataset.index);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        const dragging = document.querySelector('.dragging');
+        const container = document.getElementById('time-slots-list');
+        const afterElement = this.getDragAfterElement(container, e.clientY);
+        
+        if (afterElement == null) {
+            container.appendChild(dragging);
+        } else {
+            container.insertBefore(dragging, afterElement);
+        }
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        this.reindexTimeSlots();
+    }
+
+    handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+
+    getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.time-slot-item:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Save custom time slots
+    saveTimeSlots() {
+        const container = document.getElementById('time-slots-list');
+        const customTimeSlots = [];
+        
+        Array.from(container.children).forEach(item => {
+            const startInput = item.querySelector('[data-type="start"]');
+            const endInput = item.querySelector('[data-type="end"]');
+            const startTime = startInput.value;
+            const endTime = endInput.value;
+            
+            if (startTime && endTime) {
+                customTimeSlots.push(`${startTime} - ${endTime}`);
+            }
+        });
+        
+        this.customization.customTimeSlots = customTimeSlots;
+        this.renderCurrentWeek();
+        this.closeTimeSlotEditor();
+        this.saveTimetable();
+        this.showSuccessMessage('Time slots updated successfully!');
+    }
+
+    closeTimeSlotEditor() {
+        document.getElementById('time-slot-editor-modal').style.display = 'none';
+    }
+
+    // Override generateTimeSlots to use custom slots if available
+    generateTimeSlots() {
+        if (this.customization.customTimeSlots && this.customization.customTimeSlots.length > 0) {
+            return this.customization.customTimeSlots;
+        }
+        
+        // Original time slot generation logic
+        const slots = [];
+        const start = this.parseTime(this.config.startTime);
+        const end = this.parseTime(this.config.endTime);
+        const duration = this.config.slotDuration;
+        
+        let current = start;
+        while (current < end) {
+            const hours = Math.floor(current / 60);
+            const minutes = current % 60;
+            const nextSlot = current + duration;
+            const nextHours = Math.floor(nextSlot / 60);
+            const nextMinutes = nextSlot % 60;
+            
+            slots.push(`${this.formatTime(hours, minutes)} - ${this.formatTime(nextHours, nextMinutes)}`);
+            current = nextSlot;
+        }
+        
+        return slots;
+    }
+
     // Custom notification time methods
     addCustomTimeInput() {
         const container = document.querySelector('.custom-times-container');
@@ -733,10 +1080,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Global functions for modal
-function closeModal() {
-    app.closeModal();
-}
+// Global functions for modals\nfunction closeModal() {\n    app.closeModal();\n}\n\nfunction closeTimeSlotEditor() {\n    app.closeTimeSlotEditor();\n}\n\nfunction saveTimeSlots() {\n    app.saveTimeSlots();\n}
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

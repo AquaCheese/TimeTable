@@ -15,6 +15,7 @@ A comprehensive web application for students to create and manage their personal
 - **Modern UI**: Clean, intuitive interface with smooth animations
 - **Color-Coded Subjects**: 8 different color themes for easy visual organization
 - **Interactive Timetable**: Click any time slot to edit or add activities
+- **Excel-like Customization**: Resize cells, edit time slots, and customize table appearance
 
 ### 🔔 Smart Notifications
 - **Browser Notifications**: Real-time desktop notifications for upcoming classes
@@ -24,11 +25,19 @@ A comprehensive web application for students to create and manage their personal
 - **Per-Slot Control**: Enable/disable notifications for individual time slots
 - **Smart Scheduling**: Automatically schedules notifications for future classes
 
+### 🎨 Table Customization (Excel-like Features)
+- **Resizable Cells**: Adjust cell width (80-200px) and height (40-120px) with sliders
+- **Custom Time Slots**: Edit, add, or remove time slots with drag-and-drop functionality
+- **Border Styles**: Choose from solid, dashed, dotted, or double border styles
+- **Grid Opacity**: Adjust table transparency for better readability
+- **Live Preview**: See changes in real-time as you customize
+- **Drag & Drop**: Reorder time slots by dragging them up or down
+
 ### 💾 Data Management
 - **Local Storage**: All data saved in your browser's local storage
 - **Auto-Save**: Automatic saving of your timetable and preferences
 - **Import/Export**: Export your timetable as JSON for backup or sharing
-- **Persistent Settings**: Your notification preferences are remembered
+- **Persistent Settings**: Your notification preferences and customizations are remembered
 
 ## 🚀 Getting Started
 
@@ -51,6 +60,21 @@ A comprehensive web application for students to create and manage their personal
    - **Notes**: Additional information
    - **Color**: Choose a color theme for visual organization
    - **Notifications**: Enable/disable notifications for this specific slot
+
+### Customizing Your Timetable
+1. Click "Customize Table" to open the customization panel
+2. **Adjust Cell Dimensions**:
+   - Use sliders to resize cell width and height
+   - See changes applied in real-time
+3. **Manage Time Slots**:
+   - Click "Edit Time Slots" to open the time slot editor
+   - Add new slots with "+ Add Slot"
+   - Remove slots with "- Remove Slot"
+   - Drag slots to reorder them
+4. **Customize Appearance**:
+   - Change border styles (solid, dashed, dotted, double)
+   - Adjust grid opacity for better visibility
+5. Click "Apply Changes" to save your customizations
 
 ### Setting Up Notifications
 1. Click "Enable Notifications" in the Notifications section
@@ -111,6 +135,12 @@ The app is fully responsive and works great on mobile devices:
 - Include room numbers for easy navigation
 - Add instructor names for quick reference
 - Use notes for special requirements or materials
+
+### Table Customization
+- **Cell Size**: Larger cells for detailed information, smaller for compact view
+- **Time Slots**: Create irregular schedules (e.g., 9:00-10:30, 10:45-12:15)
+- **Visual Style**: Use dashed borders for tentative classes, solid for confirmed
+- **Opacity**: Lower opacity for background reference, full opacity for active use
 
 ### Notifications
 - Enable notifications for important classes only

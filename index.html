@@ -60,6 +60,66 @@
                     <button id="save-timetable" class="btn-success">Save Timetable</button>
                     <button id="reset-timetable" class="btn-danger">Reset</button>
                     <button id="export-timetable" class="btn-secondary">Export</button>
+                    <button id="customize-table" class="btn-secondary">Customize Table</button>
+                </div>
+            </div>
+            
+            <!-- Timetable Customization Panel -->
+            <div id="customization-panel" class="customization-panel" style="display: none;">
+                <div class="customization-header">
+                    <h3>🎨 Table Customization</h3>
+                    <button id="close-customization" class="close-btn">&times;</button>
+                </div>
+                <div class="customization-content">
+                    <div class="customization-section">
+                        <h4>Cell Dimensions</h4>
+                        <div class="dimension-controls">
+                            <div class="form-group">
+                                <label for="cell-width">Cell Width (px):</label>
+                                <input type="range" id="cell-width" min="80" max="200" value="120">
+                                <span id="cell-width-value">120px</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="cell-height">Cell Height (px):</label>
+                                <input type="range" id="cell-height" min="40" max="120" value="60">
+                                <span id="cell-height-value">60px</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="customization-section">
+                        <h4>Time Slots Management</h4>
+                        <div class="time-management">
+                            <button id="edit-time-slots" class="btn-primary btn-small">Edit Time Slots</button>
+                            <button id="add-time-slot" class="btn-success btn-small">+ Add Slot</button>
+                            <button id="remove-time-slot" class="btn-danger btn-small">- Remove Slot</button>
+                        </div>
+                    </div>
+                    
+                    <div class="customization-section">
+                        <h4>Table Appearance</h4>
+                        <div class="appearance-controls">
+                            <div class="form-group">
+                                <label for="border-style">Border Style:</label>
+                                <select id="border-style">
+                                    <option value="solid">Solid</option>
+                                    <option value="dashed">Dashed</option>
+                                    <option value="dotted">Dotted</option>
+                                    <option value="double">Double</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="grid-opacity">Grid Opacity:</label>
+                                <input type="range" id="grid-opacity" min="0.2" max="1" step="0.1" value="1">
+                                <span id="grid-opacity-value">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="customization-actions">
+                        <button id="reset-customization" class="btn-secondary">Reset to Default</button>
+                        <button id="apply-customization" class="btn-primary">Apply Changes</button>
+                    </div>
                 </div>
             </div>
             <div id="week-selector" class="week-selector"></div>
@@ -101,6 +161,26 @@
             </div>
             <div id="notification-status" class="notification-status"></div>
         </section>
+    </div>
+
+    <!-- Modal for editing time slots -->
+    <div id="time-slot-editor-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Time Slots</h3>
+                <span class="close" onclick="closeTimeSlotEditor()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="time-slots-list" id="time-slots-list">
+                    <!-- Time slots will be populated here -->
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="add-new-time-slot" class="btn-success">+ Add New Slot</button>
+                    <button type="button" class="btn-primary" onclick="saveTimeSlots()">Save Changes</button>
+                    <button type="button" class="btn-secondary" onclick="closeTimeSlotEditor()">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal for editing timetable slots -->
