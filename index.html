@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Time Table</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Student Time Table</h1>
+            <p>Create your custom timetable with notifications</p>
+        </header>
+
+        <!-- Setup Section -->
+        <section id="setup-section" class="section">
+            <h2>Setup Your Timetable</h2>
+            <div class="setup-form">
+                <div class="form-group">
+                    <label for="weeks">Number of Weeks:</label>
+                    <input type="number" id="weeks" min="1" max="52" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="days">Days per Week:</label>
+                    <select id="days">
+                        <option value="5">Monday - Friday</option>
+                        <option value="6">Monday - Saturday</option>
+                        <option value="7">Monday - Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="start-time">Start Time:</label>
+                    <input type="time" id="start-time" value="08:00">
+                </div>
+                <div class="form-group">
+                    <label for="end-time">End Time:</label>
+                    <input type="time" id="end-time" value="17:00">
+                </div>
+                <div class="form-group">
+                    <label for="slot-duration">Slot Duration (minutes):</label>
+                    <select id="slot-duration">
+                        <option value="30">30 minutes</option>
+                        <option value="45">45 minutes</option>
+                        <option value="60" selected>1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+                <button id="generate-timetable" class="btn-primary">Generate Timetable</button>
+                <button id="load-saved" class="btn-secondary">Load Saved Timetable</button>
+            </div>
+        </section>
+
+        <!-- Timetable Section -->
+        <section id="timetable-section" class="section" style="display: none;">
+            <div class="timetable-header">
+                <h2>Your Timetable</h2>
+                <div class="timetable-controls">
+                    <button id="save-timetable" class="btn-success">Save Timetable</button>
+                    <button id="reset-timetable" class="btn-danger">Reset</button>
+                    <button id="export-timetable" class="btn-secondary">Export</button>
+                </div>
+            </div>
+            <div id="week-selector" class="week-selector"></div>
+            <div id="timetable-container" class="timetable-container"></div>
+        </section>
+
+        <!-- Notifications Section -->
+        <section id="notifications-section" class="section" style="display: none;">
+            <h2>Notification Settings</h2>
+            <div class="notification-controls">
+                <button id="enable-notifications" class="btn-primary">Enable Notifications</button>
+                <button id="test-notification" class="btn-secondary">Test Notification</button>
+            </div>
+            <div class="notification-settings">
+                <h3>Notification Rules</h3>
+                <div class="form-group">
+                    <label>Notify me:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="notify-before-5" checked> 5 minutes before class</label>
+                        <label><input type="checkbox" id="notify-before-15"> 15 minutes before class</label>
+                        <label><input type="checkbox" id="notify-before-30"> 30 minutes before class</label>
+                        <label><input type="checkbox" id="notify-start"> At class start time</label>
+                        <label><input type="checkbox" id="notify-custom"> Custom times</label>
+                    </div>
+                </div>
+                <div class="form-group custom-notifications" id="custom-notifications-section" style="display: none;">
+                    <label>Custom notification times (minutes before class):</label>
+                    <div class="custom-times-container">
+                        <div class="custom-time-input">
+                            <input type="number" class="custom-time" min="1" max="1440" placeholder="e.g., 10">
+                            <button type="button" class="btn-remove-time">×</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-custom-time" class="btn-secondary btn-small">+ Add Time</button>
+                    <div class="custom-times-help">
+                        <small>Enter minutes before class (1-1440). Examples: 10 for 10 minutes, 60 for 1 hour, 120 for 2 hours</small>
+                    </div>
+                </div>
+            </div>
+            <div id="notification-status" class="notification-status"></div>
+        </section>
+    </div>
+
+    <!-- Modal for editing timetable slots -->
+    <div id="slot-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Time Slot</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="slot-form">
+                    <div class="form-group">
+                        <label for="subject">Subject/Activity:</label>
+                        <input type="text" id="subject" placeholder="e.g., Mathematics, Study Time">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" placeholder="e.g., Room 101, Library">
+                    </div>
+                    <div class="form-group">
+                        <label for="instructor">Instructor:</label>
+                        <input type="text" id="instructor" placeholder="e.g., Prof. Smith">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea id="notes" placeholder="Additional notes..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="color">Color:</label>
+                        <select id="color">
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                            <option value="red">Red</option>
+                            <option value="orange">Orange</option>
+                            <option value="purple">Purple</option>
+                            <option value="teal">Teal</option>
+                            <option value="pink">Pink</option>
+                            <option value="gray">Gray</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="enable-slot-notification">
+                            Enable notifications for this slot
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" id="clear-slot" class="btn-danger">Clear</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
